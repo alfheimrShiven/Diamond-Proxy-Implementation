@@ -28,8 +28,8 @@ library LibDiamond {
     }
 
     /// @dev Assigns and returns a fixed arbitrary storage slot for the DiamondStorage struct. This is done to avoid storage collisions.
-    function _getDiamondStorage()
-        internal
+    function getDiamondStorage()
+        public
         pure
         returns (DiamondStorage storage ds)
     {
@@ -41,13 +41,13 @@ library LibDiamond {
 
     /// @dev Setter function for contract owner
     function _setDiamondProxyOwner(address _owner) internal {
-        DiamondStorage storage ds = _getDiamondStorage();
+        DiamondStorage storage ds = getDiamondStorage();
         ds.contractOwner = _owner;
     }
 
     /// @dev Setter function to store FacetCut info permanently into DiamondProxyStorage
     function _setFunctionSelectorsAndFacet(FacetCut memory facetCut) internal {
-        DiamondStorage storage ds = _getDiamondStorage();
+        DiamondStorage storage ds = getDiamondStorage();
 
         for (uint256 s = 0; s < facetCut.functionSelectors.length; s++) {
             bytes4 selector = facetCut.functionSelectors[s];

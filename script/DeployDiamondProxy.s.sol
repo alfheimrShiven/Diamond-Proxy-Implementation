@@ -7,7 +7,7 @@ import {LibDiamond} from "library/LibDiamond.sol";
 import {LibHelper} from "library/utils/LibHelper.sol";
 
 contract FacetA {
-    uint256 num;
+    uint256 public num;
 
     function setNum(uint256 _num) external {
         num = _num;
@@ -16,6 +16,10 @@ contract FacetA {
     function addNum(uint256 _num) external {
         num += _num;
     }
+
+    function getNum() external view returns (uint256) {
+        return num;
+    }
 }
 
 contract DeployDiamondProxy is Script {
@@ -23,20 +27,32 @@ contract DeployDiamondProxy is Script {
     LibDiamond.FacetCut[] facetCuts;
     address owner = makeAddr("owner");
     DiamondProxy diamondProxy;
+    FacetA facetA;
 
-    function run() external returns (DiamondProxy) {
-        FacetA facetA = new FacetA();
+    function run() external returns (DiamondProxy, FacetA) {
+        // preparing the FacetCut for the FacetA facet
+        facetA = new FacetA();
         bytes4 setNumFunctionSelector = LibHelper.getFunctionSelector(
             "setNum(uint256)"
         );
+        bytes4 addNumFunctionSelector = LibHelper.getFunctionSelector(
+            "addNum(uint256)"
+        );
+        bytes4 getNumFunctionSelector = LibHelper.getFunctionSelector(
+            "getNum()"
+        );
 
         facetCut.facetAddress = address(facetA);
-        facetCut.functionSelectors = [setNumFunctionSelector];
+        facetCut.functionSelectors = [
+            setNumFunctionSelector,
+            addNumFunctionSelector,
+            getNumFunctionSelector
+        ];
         facetCut.action = LibDiamond.FacetCutAction.ADD;
 
         facetCuts.push(facetCut);
 
         diamondProxy = new DiamondProxy(facetCuts, owner);
-        return diamondProxy;
+        return (diamondProxy, facetA);
     }
 }
