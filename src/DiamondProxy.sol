@@ -2,6 +2,7 @@
 pragma solidity 0.8.20;
 import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
 import {LibDiamond} from "library/LibDiamond.sol";
+import "forge-std/console.sol";
 
 /// @dev The main proxy contract implementing the Diamond Proxy Pattern
 contract DiamondProxy is Proxy {
@@ -57,6 +58,17 @@ contract DiamondProxy is Proxy {
                 LibDiamond.replaceFunctions(facet);
             }
         }
+    }
+
+    function getFacet(bytes4 sig) external returns (address) {
+        if (msg.sender != LibDiamond.getDiamondProxyOwner()) {
+            _fallback();
+        }
+
+        // get the function selector
+        LibDiamond.DiamondStorage storage ds = LibDiamond.getDiamondStorage();
+
+        return ds.functionSelectorAndFacet[sig];
     }
 
     /// @dev Following Transparent Proxy Pattern

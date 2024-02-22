@@ -5,6 +5,7 @@ error FunctionSelectorAlreadyExists(bytes4 existingSelector);
 error FunctionSelectorDoesNotExist(bytes4 selector);
 
 import {LibHelper} from "./utils/LibHelper.sol";
+import "forge-std/console.sol";
 
 library LibDiamond {
     /// @dev Defines the action to be performed for a particular FacetCut
