@@ -18,7 +18,7 @@ contract DiamondProxy is Proxy {
                 "DiamondProxy: Can only add facets while initiliazing proxy"
             );
 
-            LibDiamond._setFunctionSelectorsAndFacet(facetCuts[f]);
+            LibDiamond.addFunctions(facetCuts[f]);
         }
     }
 
@@ -36,8 +36,8 @@ contract DiamondProxy is Proxy {
         return facet;
     }
 
-    /// @dev Will allow the proxy owner to perform facet actions
-    /// @notice Can only be called by the owner. This also prevents
+    /// @dev Will allow the proxy owner to perform facet actions ADD, REMOVE, REPLACE. Also implements Transparent Proxy Pattern to avoid function selector collisions.
+    /// @notice Can only be called by the owner.
     function performFacetAction(
         LibDiamond.FacetCut[] memory facetCuts
     ) external {
@@ -46,7 +46,17 @@ contract DiamondProxy is Proxy {
             _fallback();
         }
 
-        // TODO: Perform all facet actions: ADD, REPLACE, REMOVE
+        for (uint256 f = 0; f < facetCuts.length; f++) {
+            LibDiamond.FacetCut memory facet = facetCuts[f];
+
+            if (facet.action == LibDiamond.FacetCutAction.ADD) {
+                LibDiamond.addFunctions(facet);
+            } else if (facet.action == LibDiamond.FacetCutAction.REMOVE) {
+                LibDiamond.removeFunctions(facet);
+            } else {
+                LibDiamond.replaceFunctions(facet);
+            }
+        }
     }
 
     /// @dev Following Transparent Proxy Pattern
