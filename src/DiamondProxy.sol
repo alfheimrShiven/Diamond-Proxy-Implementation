@@ -7,9 +7,11 @@ import {LibDiamond} from "library/LibDiamond.sol";
 contract DiamondProxy is Proxy {
     // Errors //
     error NoFacetFound(bytes4 msgSelector);
+    error OwnerCannotCallFacet();
 
     constructor(LibDiamond.FacetCut[] memory facetCuts, address _owner) {
         LibDiamond._setDiamondProxyOwner(_owner);
+        // adding implementation contract/facet details in DiamondProxy storage
         for (uint256 f = 0; f < facetCuts.length; f++) {
             require(
                 facetCuts[f].action == LibDiamond.FacetCutAction.ADD,
@@ -32,6 +34,27 @@ contract DiamondProxy is Proxy {
             revert NoFacetFound(msg.sig);
         }
         return facet;
+    }
+
+    /// @dev Will allow the proxy owner to perform facet actions
+    /// @notice Can only be called by the owner. This also prevents
+    function performFacetAction(
+        LibDiamond.FacetCut[] memory facetCuts
+    ) external {
+        /// @dev forwarding call to implementation contract when called by non-owner tackling function selector clash.
+        if (msg.sender != LibDiamond.getDiamondProxyOwner()) {
+            _fallback();
+        }
+
+        // TODO: Perform all facet actions: ADD, REPLACE, REMOVE
+    }
+
+    /// @dev Following Transparent Proxy Pattern
+    fallback() external payable override {
+        if (msg.sender == LibDiamond.getDiamondProxyOwner()) {
+            revert OwnerCannotCallFacet();
+        }
+        _fallback();
     }
 
     receive() external payable {}
