@@ -2,7 +2,6 @@
 pragma solidity 0.8.20;
 import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
 import {LibDiamond} from "library/LibDiamond.sol";
-import "forge-std/console.sol";
 
 /// @dev The main proxy contract implementing the Diamond Proxy Pattern
 contract DiamondProxy is Proxy {

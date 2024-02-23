@@ -5,7 +5,6 @@ error FunctionSelectorAlreadyExists(bytes4 existingSelector);
 error FunctionSelectorDoesNotExist(bytes4 selector);
 
 import {LibHelper} from "./utils/LibHelper.sol";
-import "forge-std/console.sol";
 
 library LibDiamond {
     /// @dev Defines the action to be performed for a particular FacetCut
@@ -26,10 +25,12 @@ library LibDiamond {
     bytes32 constant DIAMOND_STORAGE_SLOT =
         keccak256("diamond.standard.diamond.storage");
 
-    /// @dev Struct to store mapping of function selectors with respective implementation contract (aka facet), all function selectors and the owner of the proxy contract (assuming owner to be a single entity. Can be replace by more sophisticated entities like DAO to avoid centralisation.
+    /// @dev Struct to store mapping of function selectors with respective implementation contract (aka facet) and the owner of the proxy contract.
+    /// @notice We're assuming owner to be a single entity for this implementation but can be replace by more sophisticated entities like DAO to avoid centralisation.
     struct DiamondStorage {
         mapping(bytes4 => address) functionSelectorAndFacet;
         address contractOwner;
+        mapping(address => uint256) userBalances;
     }
 
     /// @dev Assigns and returns a fixed arbitrary storage slot for the DiamondStorage struct. This is done to avoid storage collisions.

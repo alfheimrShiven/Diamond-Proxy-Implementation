@@ -11,10 +11,16 @@ contract DiamondProxyTest is Test {
     // Errors //
     error NoFacetFound(bytes4);
 
-    DiamondProxy diamondProxy;
-    FacetA facetA;
-    FacetB facetB;
-    address owner;
+    // Events //
+    event Deposited(address, uint256);
+    event WithdrawSuccessful(address, uint256);
+
+    DiamondProxy public diamondProxy;
+    FacetA public facetA;
+    FacetB public facetB;
+    address public owner;
+
+    uint256 public constant DEPOSIT_AMT = 2 ether;
 
     function setUp() external {
         DeployDiamondProxy deployer = new DeployDiamondProxy();
@@ -46,6 +52,8 @@ contract DiamondProxyTest is Test {
 
         assertEq(returnedNum, 25);
     }
+
+    // Facet Action tests //
 
     function testAddFacetAction() external {
         bytes4 addNumFunctionSelector = LibHelper.getFunctionSelector(
@@ -146,4 +154,34 @@ contract DiamondProxyTest is Test {
 
         diamondProxy.performFacetAction(facetCuts);
     }
+
+    // Transaction Through Proxy Tests //
+    function testDepositThroughProxy() external {
+        bytes memory depositTxn = abi.encodeWithSignature("deposit()");
+
+        vm.expectEmit(true, true, false, true);
+        emit Deposited(address(this), DEPOSIT_AMT);
+        (bool depositSuccess, ) = address(diamondProxy).call{
+            value: DEPOSIT_AMT
+        }(depositTxn);
+        (depositSuccess) = (depositSuccess);
+    }
+
+    function testWithdrawThroughProxy() external {
+        bytes memory depositTxn = abi.encodeWithSignature("deposit()");
+        (bool depositSuccess, ) = address(diamondProxy).call{
+            value: DEPOSIT_AMT
+        }(depositTxn);
+        (depositSuccess) = (depositSuccess);
+
+        bytes memory withdrawTxn = abi.encodeWithSignature("withdraw()");
+
+        vm.expectEmit(true, true, false, true);
+        emit WithdrawSuccessful(address(this), DEPOSIT_AMT);
+        (bool withdrawSuccess, ) = address(diamondProxy).call(withdrawTxn);
+        withdrawSuccess = withdrawSuccess;
+    }
+
+    /// @dev adding receive() for withdrawal tests
+    receive() external payable {}
 }

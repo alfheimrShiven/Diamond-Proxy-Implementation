@@ -44,13 +44,13 @@ contract DeployDiamondProxy is Script {
     address public owner = makeAddr("owner");
     DiamondProxy public diamondProxy;
     FacetA public facetA;
-    FacetB public facetB;
+    FacetB public facetB = new FacetB();
     DepositFacet public depositFacet;
     WithdrawFacet public withdrawFacet;
 
     function run() external returns (DiamondProxy, FacetA, FacetB, address) {
         // preparing the FacetCuts
-        // FacetA
+        // 1. FacetA.sol
         facetA = new FacetA();
         // getting function selectors
         bytes4 setNumFunctionSelector = LibHelper.getFunctionSelector(
@@ -69,7 +69,7 @@ contract DeployDiamondProxy is Script {
 
         facetCuts.push(facetCut);
 
-        // DepositFacet
+        // 2. DepositFacet
         depositFacet = new DepositFacet();
         // getting function selectors
         bytes4 depositFunctionSelector = LibHelper.getFunctionSelector(
@@ -78,6 +78,7 @@ contract DeployDiamondProxy is Script {
         bytes4 getBalanceFunctionSelector = LibHelper.getFunctionSelector(
             "getBalance()"
         );
+
         // creating facetCut
         facetCut.facetAddress = address(depositFacet);
         facetCut.functionSelectors = [
@@ -88,7 +89,7 @@ contract DeployDiamondProxy is Script {
 
         facetCuts.push(facetCut);
 
-        // Withdraw Facet
+        // 3. Withdraw Facet
         withdrawFacet = new WithdrawFacet();
         // getting function selectors
         bytes4 withdrawFunctionSelector = LibHelper.getFunctionSelector(

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.20;
+import {LibDiamond} from "../../library/LibDiamond.sol";
 
 contract Deposit {
     // Events //
@@ -13,11 +14,13 @@ contract Deposit {
             msg.value > 0,
             "DepositContract: Value should be more than zero"
         );
-        userBalances[msg.sender] += msg.value;
+        LibDiamond.DiamondStorage storage ds = LibDiamond.getDiamondStorage();
+        ds.userBalances[msg.sender] += msg.value;
         emit Deposited(msg.sender, msg.value);
     }
 
     function getBalance() external view returns (uint256) {
-        return userBalances[msg.sender];
+        LibDiamond.DiamondStorage storage ds = LibDiamond.getDiamondStorage();
+        return ds.userBalances[msg.sender];
     }
 }
