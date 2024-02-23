@@ -11,6 +11,7 @@ contract DiamondProxy is Proxy {
 
     constructor(LibDiamond.FacetCut[] memory facetCuts, address _owner) {
         LibDiamond._setDiamondProxyOwner(_owner);
+
         // adding implementation contract/facet details in DiamondProxy storage
         for (uint256 f = 0; f < facetCuts.length; f++) {
             require(

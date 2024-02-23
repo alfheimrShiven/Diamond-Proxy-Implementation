@@ -5,8 +5,10 @@ import {Script} from "forge-std/Script.sol";
 import {DiamondProxy} from "src/DiamondProxy.sol";
 import {LibDiamond} from "library/LibDiamond.sol";
 import {LibHelper} from "library/utils/LibHelper.sol";
+import {StakingToken as DiamondStakingToken} from "src/utils/StakingToken.sol";
 import {Deposit as DepositFacet} from "src/Facets/Deposit.sol";
 import {Withdraw as WithdrawFacet} from "src/Facets/Withdraw.sol";
+import {Staking as StakingFacet} from "src/Facets/Staking.sol";
 
 contract FacetA {
     uint256 public num;
@@ -103,6 +105,36 @@ contract DeployDiamondProxy is Script {
 
         facetCuts.push(facetCut);
 
+        // 4. Staking Facet
+        DiamondStakingToken dsToken = new DiamondStakingToken();
+        StakingFacet stakingFacet = new StakingFacet(address(dsToken));
+
+        // initial mint for staking facet to provide rewards to user
+        dsToken.mint(address(stakingFacet), 100 ether);
+
+        // getting function selectors
+        bytes4 stakeFunctionSelector = LibHelper.getFunctionSelector(
+            "stake(uint256 amount)"
+        );
+        bytes4 unstakeFunctionSelector = LibHelper.getFunctionSelector(
+            "unstake()"
+        );
+        bytes4 rewardFunctionSelector = LibHelper.getFunctionSelector(
+            "calculateReward(address)"
+        );
+
+        // creating facetCut
+        facetCut.facetAddress = address(stakingFacet);
+        facetCut.functionSelectors = [
+            stakeFunctionSelector,
+            unstakeFunctionSelector,
+            rewardFunctionSelector
+        ];
+        facetCut.action = LibDiamond.FacetCutAction.ADD;
+
+        facetCuts.push(facetCut);
+
+        // deploying DiamondProxy
         diamondProxy = new DiamondProxy(facetCuts, owner);
         return (diamondProxy, facetA, facetB, owner);
     }
