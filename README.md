@@ -54,6 +54,63 @@ You can consider them as info objects for actions like **adding, replacing and r
     }
 ```
 
+## Quickstart
+
+```
+git clone https://github.com/alfheimrShiven/Wasserstoff-Task-2-2024-Blockchain-Interviews.git
+cd Wasserstoff-Task-2-2024-Blockchain-Interviews
+make start
+```
+
+# Usage
+
+## Start a local node
+
+```
+make anvil
+```
+
+## Deploy
+
+This will default to your local node which is running the Anvil chain. You need to have it running in another terminal in order for it to deploy.
+
+```
+make deploy
+```
+
+## Deploy - Other Network
+
+[See below](#deployment-to-a-testnet)
+
+## Testing
+
+1. Unit
+2. Integration
+
+```
+forge test
+```
+
+### Test Coverage
+
+```
+forge coverage
+```
+
+## Deployment to a testnet
+
+1. Setup environment variables
+
+You'll want to set your `SEPOLIA_RPC_URL` and `SEPOLIA_PRIVATE_KEY` as environment variables. You can add them to a `.env` file.
+
+Optionally, add your `ETHERSCAN_API_KEY` if you want to verify your contract on [Etherscan](https://etherscan.io/).
+
+2. Deploy on Sepolia
+
+```
+make deploy ARGS="--network sepolia"
+```
+
 ## Major Design Decisions🧑🏻‍💻
 1. **Diamond Proxy Pattern**: The Diamond pattern was a perfect fit for the problem statement.
 2. **Transparent Proxy Pattern**: This pattern is implemented to avoid function selector clashes (Preventing users from calling `performFacetAction()` and preventing admins from calling facet contracts).
@@ -61,8 +118,15 @@ You can consider them as info objects for actions like **adding, replacing and r
 Did not use `onlyOwner` modifier as it can prevent all function call forwarding to a facet incase of a function clash, when called by any non-owner.
 3. **LibDiamond**: Abstracted all facet actions in this library. [Read code.](https://github.com/alfheimrShiven/Wasserstoff-Task-2-2024-Blockchain-Interviews/blob/main/library/LibDiamond.sol)
 
-## Author
-Shivendra Singh
+
+## Find it on Sepolia TestNet
+[Diamond Proxy Contract](https://sepolia.etherscan.io/address/0xDc82c0362A241Aa94d53546648EACe48C9773dAa)
+
+
+## Author 🥷🏽
+**Shivendra Singh**
+
+shiventechub@gmail.com
 
 [**Github**](https://github.com/alfheimrShiven)
 
